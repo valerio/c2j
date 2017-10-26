@@ -15,6 +15,7 @@ func main() {
 	app := cli.NewApp()
 
 	app.Name = "c2j"
+	app.UsageText = "./c2j input.csv [options] > output.json"
 	app.Description = "A simple cli tool for converting csv to json"
 	app.Version = "0.0.1"
 
