@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
@@ -22,17 +23,25 @@ func main() {
 			Name:  "file, f",
 			Usage: "Input file to be converted",
 		},
+		cli.BoolFlag{
+			Name:  "noheaders, nh",
+			Usage: "Specifies that the file has no headers",
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
-		run(c.String("file"))
+		if c.String("file") == "" {
+			return errors.New("Must specify an input file")
+		}
+
+		run(c.String("file"), c.Bool("noheaders"))
 		return nil
 	}
 
-	app.Run(os.Args)
+	app.RunAndExitOnError()
 }
 
-func run(inputFile string) {
+func run(inputFile string, noHeaders bool) {
 	f, err := os.Open(inputFile)
 	if err != nil {
 		panic(err)
@@ -40,9 +49,13 @@ func run(inputFile string) {
 
 	csvReader := csv.NewReader(bufio.NewReader(f))
 
-	headers, err := csvReader.Read()
-	if err != nil {
-		panic(err)
+	var headers []string
+
+	if noHeaders == false {
+		headers, err = csvReader.Read()
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	result, err := csvReader.ReadAll()
@@ -56,23 +69,27 @@ func run(inputFile string) {
 	first := true
 
 	for _, parsed := range result {
-		m := make(map[string]string)
-
-		for idx, header := range headers {
-			if parsed[idx] == "" {
-				continue
-			}
-
-			m[header] = parsed[idx]
-		}
-
 		if first {
 			first = !first
 		} else {
 			fmt.Print(",")
 		}
 
-		encoder.Encode(m)
+		if headers != nil {
+			m := make(map[string]string)
+
+			for idx, header := range headers {
+				if parsed[idx] == "" {
+					continue
+				}
+
+				m[header] = parsed[idx]
+			}
+			encoder.Encode(m)
+		} else {
+			encoder.Encode(parsed)
+		}
+
 	}
 
 	fmt.Print("]")
