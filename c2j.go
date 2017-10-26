@@ -32,17 +32,20 @@ func main() {
 			return errors.New("Must specify an input file")
 		}
 
-		run(fileName, c.Bool("noheaders"))
-		return nil
+		return run(fileName, c.Bool("noheaders"))
 	}
 
-	app.RunAndExitOnError()
+	err := app.Run(os.Args)
+
+	if err != nil {
+		fmt.Printf("%v\n", err.Error())
+	}
 }
 
-func run(inputFile string, noHeaders bool) {
+func run(inputFile string, noHeaders bool) error {
 	f, err := os.Open(inputFile)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	csvReader := csv.NewReader(bufio.NewReader(f))
@@ -52,13 +55,13 @@ func run(inputFile string, noHeaders bool) {
 	if noHeaders == false {
 		headers, err = csvReader.Read()
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 
 	result, err := csvReader.ReadAll()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	encoder := json.NewEncoder(os.Stdout)
@@ -91,4 +94,5 @@ func run(inputFile string, noHeaders bool) {
 	}
 
 	fmt.Print("]")
+	return nil
 }
