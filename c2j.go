@@ -20,22 +20,19 @@ func main() {
 	app.Version = "0.0.1"
 
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "file, f",
-			Usage: "Input file to be converted",
-		},
 		cli.BoolFlag{
 			Name:  "noheaders, nh",
-			Usage: "Specifies that the file has no headers",
+			Usage: "specifies that the input file has no headers",
 		},
 	}
 
 	app.Action = func(c *cli.Context) error {
-		if c.String("file") == "" {
+		fileName := c.Args().First()
+		if fileName == "" {
 			return errors.New("Must specify an input file")
 		}
 
-		run(c.String("file"), c.Bool("noheaders"))
+		run(fileName, c.Bool("noheaders"))
 		return nil
 	}
 
