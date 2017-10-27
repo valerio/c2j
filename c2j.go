@@ -64,23 +64,26 @@ func run(inputFile string, noHeaders bool) error {
 		return err
 	}
 
-	encoder := json.NewEncoder(os.Stdout)
+	writer := bufio.NewWriter(os.Stdout)
+	defer writer.Flush()
 
-	fmt.Println("[")
+	encoder := json.NewEncoder(writer)
+
+	writer.WriteString("[\n")
 	first := true
 
 	for _, parsed := range result {
 		if first {
 			first = !first
 		} else {
-			fmt.Print(",")
+			writer.WriteString(",")
 		}
-
+		
+		m := make(map[string]string)
 		if headers != nil {
-			m := make(map[string]string)
-
 			for idx, header := range headers {
 				if parsed[idx] == "" {
+					delete(m, header)
 					continue
 				}
 
@@ -93,6 +96,6 @@ func run(inputFile string, noHeaders bool) error {
 
 	}
 
-	fmt.Print("]")
+	writer.WriteString("]")
 	return nil
 }
