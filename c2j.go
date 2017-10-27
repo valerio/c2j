@@ -68,6 +68,7 @@ func run(inputFile string, noHeaders bool) error {
 	defer writer.Flush()
 
 	encoder := json.NewEncoder(writer)
+	encoder.SetEscapeHTML(false)
 
 	writer.WriteString("[\n")
 	first := true
@@ -78,7 +79,7 @@ func run(inputFile string, noHeaders bool) error {
 		} else {
 			writer.WriteString(",")
 		}
-		
+
 		m := make(map[string]string)
 		if headers != nil {
 			for idx, header := range headers {
