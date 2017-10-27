@@ -48,8 +48,9 @@ func run(inputFile string, noHeaders bool) error {
 		return err
 	}
 
-	csvReader := csv.NewReader(bufio.NewReader(f))
+	defer f.Close()
 
+	csvReader := csv.NewReader(bufio.NewReader(f))
 	var headers []string
 
 	if noHeaders == false {
