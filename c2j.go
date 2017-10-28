@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/urfave/cli"
+	"github.com/andybalholm/crlf"
 )
 
 func main() {
@@ -51,7 +52,7 @@ func run(inputFile string, noHeaders bool) error {
 
 	defer f.Close()
 
-	csvReader := csv.NewReader(bufio.NewReader(f))
+	csvReader := csv.NewReader(bufio.NewReader(crlf.NewReader(f)))
 	csvReader.TrimLeadingSpace = true
 	var headers []string
 
