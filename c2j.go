@@ -51,6 +51,7 @@ func run(inputFile string, noHeaders bool) error {
 	defer f.Close()
 
 	csvReader := csv.NewReader(bufio.NewReader(f))
+	csvReader.TrimLeadingSpace = true
 	var headers []string
 
 	if noHeaders == false {
