@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/urfave/cli"
@@ -61,11 +62,6 @@ func run(inputFile string, noHeaders bool) error {
 		}
 	}
 
-	result, err := csvReader.ReadAll()
-	if err != nil {
-		return err
-	}
-
 	writer := bufio.NewWriter(os.Stdout)
 	defer writer.Flush()
 
@@ -75,7 +71,11 @@ func run(inputFile string, noHeaders bool) error {
 	writer.WriteString("[\n")
 	first := true
 
-	for _, parsed := range result {
+	for parsed, err := csvReader.Read(); err != io.EOF; parsed, err = csvReader.Read() {
+		if err != nil {
+			return err
+		}
+
 		if first {
 			first = !first
 		} else {
@@ -96,7 +96,6 @@ func run(inputFile string, noHeaders bool) error {
 		} else {
 			encoder.Encode(parsed)
 		}
-
 	}
 
 	writer.WriteString("]")
